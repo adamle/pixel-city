@@ -13,12 +13,20 @@ import CoreLocation
 
 class MapVC: UIViewController, UIGestureRecognizerDelegate {
 
-    // Outlets
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var pullUpView: UIView!
+    @IBOutlet weak var pullUpViewHeightConstraint: NSLayoutConstraint!
     
     var locationManager = CLLocationManager()
     let authorizationStatus = CLLocationManager.authorizationStatus()
     let regionRadius: Double = 1000 //m2
+    
+    var spinner: UIActivityIndicatorView?
+    var progressLbl: UILabel?
+    var screenSize = UIScreen.main.bounds
+    
+    var collectionViewLayout = UICollectionViewLayout()
+    var collectionView: UICollectionView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,14 +34,72 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
         locationManager.delegate = self
         configureLocationServices()
         addDoubleTap()
+        
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: collectionViewLayout)
+        collectionView?.register(PhotoCell.self, forCellWithReuseIdentifier: "photoCell")
+        collectionView?.delegate = self
+        collectionView?.dataSource = self
+        collectionView?.backgroundColor = #colorLiteral(red: 0.3643774688, green: 0.6488357782, blue: 0.7990338206, alpha: 1)
+        
+        pullUpView.addSubview(collectionView!)
     }
     
+    // Gestures
     func addDoubleTap() {
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(dropPin(sender:)))
         doubleTap.numberOfTapsRequired = 2
         // MapVC needs to conform UIGestureRecognizerDelegate
         doubleTap.delegate = self
         mapView.addGestureRecognizer(doubleTap)
+    }
+    // Swipe down to animate pullUpView down
+    func addSwipe() {
+        let swipe = UISwipeGestureRecognizer(target: self, action: #selector(animateViewDown))
+        swipe.direction = .down
+        pullUpView.addGestureRecognizer(swipe)
+    }
+    
+    // Animate pullUpView up and down
+    func animateViewUp() {
+        pullUpViewHeightConstraint.constant = 300
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    @objc func animateViewDown() {
+        pullUpViewHeightConstraint.constant = 0
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    // Components for pullUpView
+    func addSpinner() {
+        spinner = UIActivityIndicatorView()
+        spinner?.center = CGPoint(x: (screenSize.width / 2) - ((spinner?.frame.width)! / 2), y: 150)
+        spinner?.activityIndicatorViewStyle = .whiteLarge
+        spinner?.color = #colorLiteral(red: 0.3098039329, green: 0.2039215714, blue: 0.03921568766, alpha: 1)
+        spinner?.startAnimating()
+        collectionView?.addSubview(spinner!)
+    }
+    func removeSpinner() {
+        if spinner != nil {
+            spinner?.removeFromSuperview()
+        }
+    }
+    func addProgressLabel() {
+        progressLbl = UILabel()
+        progressLbl?.frame = CGRect(x: (screenSize.width / 2) - 100, y: 175, width: 200, height: 40)
+        progressLbl?.font = UIFont(name: "Avenir-Heavy", size: 14)
+        progressLbl?.textColor = #colorLiteral(red: 0.5058823824, green: 0.3372549117, blue: 0.06666667014, alpha: 1)
+        progressLbl?.textAlignment = .center
+        progressLbl?.text = "12/20 PHOTOS LOADED"
+        collectionView?.addSubview(progressLbl!)
+    }
+    func removeProgressLbl() {
+        if progressLbl != nil {
+            progressLbl?.removeFromSuperview()
+        }
     }
 
     // IBAction
@@ -68,8 +134,20 @@ extension MapVC: MKMapViewDelegate {
     
     @objc func dropPin(sender: UITapGestureRecognizer) {
         
-        // Remove old pin
+        // Remove components from previous user dropPin
         removePin()
+        removeSpinner()
+        removeProgressLbl()
+        
+        // Animate pullUpView up
+        animateViewUp()
+      
+        // Add components to the current user dropPin
+        addSpinner()
+        addProgressLabel()
+        
+        // Swipe to animate pullUpViewDown
+        addSwipe()
         
         let touchPoint = sender.location(in: mapView)
         let touchCoordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
@@ -105,10 +183,25 @@ extension MapVC: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         centerMapOnUserLocation()
     }
-    
 }
 
-
+// Conform UICollectionViewDelegate and DataSource
+extension MapVC: UICollectionViewDelegate, UICollectionViewDataSource {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        // Number of item in array
+        return 4
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoCell", for: indexPath) as? PhotoCell
+        return cell!
+    }
+}
 
 
 
