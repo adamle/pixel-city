@@ -10,6 +10,8 @@ import UIKit
 import MapKit
 // Manage user location
 import CoreLocation
+import Alamofire
+import AlamofireImage
 
 class MapVC: UIViewController, UIGestureRecognizerDelegate {
 
@@ -27,6 +29,8 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
     
     var collectionViewLayout = UICollectionViewLayout()
     var collectionView: UICollectionView?
+    
+    var imageUrlArray = [String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -138,16 +142,14 @@ extension MapVC: MKMapViewDelegate {
         removePin()
         removeSpinner()
         removeProgressLbl()
-        
         // Animate pullUpView up
         animateViewUp()
-      
         // Add components to the current user dropPin
         addSpinner()
         addProgressLabel()
-        
         // Swipe to animate pullUpViewDown
         addSwipe()
+        
         
         let touchPoint = sender.location(in: mapView)
         let touchCoordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
@@ -155,14 +157,36 @@ extension MapVC: MKMapViewDelegate {
         let annotation = DroppablePin(coordinate: touchCoordinate, identifier: "droppablePin")
         mapView.addAnnotation(annotation)
         
+        print(flickrURL(forApiKey: API_KEY, withAnnotation: annotation, andNumberOfPhotos: 40))
+        
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(touchCoordinate, regionRadius * 2, regionRadius * 2)
         mapView.setRegion(coordinateRegion, animated: true)
+        
+        retrieveUrls(forAnnotation: annotation) { (true) in
+            print(self.imageUrlArray)
+        }
     }
     
     func removePin() {
         for annotation in mapView.annotations {
             mapView.removeAnnotation(annotation)
         }
+    }
+    
+    func retrieveUrls(forAnnotation annotation: DroppablePin, handler: @escaping (_ status: Bool) -> ()) {
+        imageUrlArray = []
+        
+        Alamofire.request(flickrURL(forApiKey: API_KEY, withAnnotation: annotation, andNumberOfPhotos: 40)).responseJSON { (response) in
+            guard let json = response.result.value as? Dictionary<String, AnyObject> else { return}
+            let photoDict = json["photos"] as! Dictionary<String, AnyObject>
+            let photoDictArray = photoDict["photo"] as! [Dictionary<String, AnyObject>]
+            for photo in photoDictArray {
+                let postUrl = "https://farm\(photo["farm"]!).staticflickr.com/\(photo["server"]!)/\(photo["id"]!)_\(photo["secret"]!)_h_d.jpg"
+                self.imageUrlArray.append(postUrl)
+            }
+            handler(true)
+        }
+        
     }
     
 }
