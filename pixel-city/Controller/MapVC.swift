@@ -11,7 +11,7 @@ import MapKit
 // Manage user location
 import CoreLocation
 
-class MapVC: UIViewController {
+class MapVC: UIViewController, UIGestureRecognizerDelegate {
 
     // Outlets
     @IBOutlet weak var mapView: MKMapView!
@@ -25,6 +25,15 @@ class MapVC: UIViewController {
         mapView.delegate = self
         locationManager.delegate = self
         configureLocationServices()
+        addDoubleTap()
+    }
+    
+    func addDoubleTap() {
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(dropPin(sender:)))
+        doubleTap.numberOfTapsRequired = 2
+        // MapVC needs to conform UIGestureRecognizerDelegate
+        doubleTap.delegate = self
+        mapView.addGestureRecognizer(doubleTap)
     }
 
     // IBAction
@@ -35,14 +44,35 @@ class MapVC: UIViewController {
     }
 }
 
-// Conform mapView delegate
+// Extension to conform mapView delegate
 extension MapVC: MKMapViewDelegate {
+    
     func centerMapOnUserLocation() {
         guard let coordinate = locationManager.location?.coordinate else { return}
         // MKCoordinateSpan tells the map how far it should be from locationManager coordinate
         let coordinateRegion = MKCoordinateRegionMakeWithDistance(coordinate, regionRadius * 2, regionRadius * 2)
         mapView.setRegion(coordinateRegion, animated: true)
     }
+    
+    @objc func dropPin(sender: UITapGestureRecognizer) {
+        removePin()
+        
+        let touchPoint = sender.location(in: mapView)
+        let touchCoordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
+    
+        let annotation = DroppablePin(coordinate: touchCoordinate, identifier: "droppablePin")
+        mapView.addAnnotation(annotation)
+        
+        let coordinateRegion = MKCoordinateRegionMakeWithDistance(touchCoordinate, regionRadius * 2, regionRadius * 2)
+        mapView.setRegion(coordinateRegion, animated: true)
+    }
+    
+    func removePin() {
+        for annotation in mapView.annotations {
+            mapView.removeAnnotation(annotation)
+        }
+    }
+    
 }
 
 // Conform coreLocationManager delegate

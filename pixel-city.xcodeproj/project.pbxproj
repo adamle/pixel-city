@@ -13,6 +13,7 @@
 		DE99A3BD1FD97AFE006DB7CE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE99A3BC1FD97AFE006DB7CE /* Assets.xcassets */; };
 		DE99A3C01FD97AFE006DB7CE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DE99A3BE1FD97AFE006DB7CE /* LaunchScreen.storyboard */; };
 		DE99A3CD1FD97BB7006DB7CE /* MapVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE99A3CC1FD97BB7006DB7CE /* MapVC.swift */; };
+		DEC307041FDAC93F00ED73D9 /* DroppablePin.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC307031FDAC93F00ED73D9 /* DroppablePin.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		DE99A3BF1FD97AFE006DB7CE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		DE99A3C11FD97AFE006DB7CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DE99A3CC1FD97BB7006DB7CE /* MapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapVC.swift; sourceTree = "<group>"; };
+		DEC307031FDAC93F00ED73D9 /* DroppablePin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DroppablePin.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +104,7 @@
 		DE99A3C81FD97B4F006DB7CE /* View */ = {
 			isa = PBXGroup;
 			children = (
+				DEC307031FDAC93F00ED73D9 /* DroppablePin.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -244,6 +247,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DE99A3B61FD97AFE006DB7CE /* AppDelegate.swift in Sources */,
+				DEC307041FDAC93F00ED73D9 /* DroppablePin.swift in Sources */,
 				DE99A3CD1FD97BB7006DB7CE /* MapVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
