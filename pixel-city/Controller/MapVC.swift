@@ -47,6 +47,18 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
 // Extension to conform mapView delegate
 extension MapVC: MKMapViewDelegate {
     
+    // Custom view for our pin annotation
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        if annotation is MKUserLocation {
+            return nil
+        }
+        
+        let pinAnnotation = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "droppablePin")
+        pinAnnotation.pinTintColor = #colorLiteral(red: 0.9597846866, green: 0.6503693461, blue: 0.1371207833, alpha: 1)
+        pinAnnotation.animatesDrop = true
+        return pinAnnotation
+    }
+    
     func centerMapOnUserLocation() {
         guard let coordinate = locationManager.location?.coordinate else { return}
         // MKCoordinateSpan tells the map how far it should be from locationManager coordinate
@@ -55,6 +67,8 @@ extension MapVC: MKMapViewDelegate {
     }
     
     @objc func dropPin(sender: UITapGestureRecognizer) {
+        
+        // Remove old pin
         removePin()
         
         let touchPoint = sender.location(in: mapView)
